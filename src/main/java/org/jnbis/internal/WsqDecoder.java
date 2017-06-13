@@ -10,6 +10,43 @@ import java.util.Arrays;
  * @since Oct 1, 2007
  */
 public class WsqDecoder {
+    public class Resolution {
+        public int width;
+        public int heigth;
+
+        public Resolution(int width, int heigth) {
+            this.width = width;
+            this.heigth = heigth;
+        }
+    }
+
+    /**
+     * Получает на вход WSQ, пытается разобрать заголовок файла и вытащить оттуда разрешение изображения
+     *
+     * @param wsq сжатое изображение, для которого требуется проставить разрешение
+     * @return изображение, поданное на вход с проставленным разрешением
+     * @throws RuntimeException в случае некооректной структуры изображения
+     */
+    public Resolution setSizeFromWsq(byte[] wsq) {
+        WsqHelper.Token token = new WsqHelper.Token(wsq);
+        token.initialize();
+
+        /* Read the SOI marker. */
+        getCMarkerWSQ(token, WsqHelper.SOI_WSQ);
+
+        /* Read in supporting tables up to the SOF marker. */
+        int marker = getCMarkerWSQ(token, WsqHelper.TBLS_N_SOF);
+        while (marker != WsqHelper.SOF_WSQ) {
+            getCTableWSQ(token, marker);
+            marker = getCMarkerWSQ(token, WsqHelper.TBLS_N_SOF);
+        }
+
+        /* Read in the Frame Header. */
+        WsqHelper.HeaderFrm frmHeaderWSQ = getCFrameHeaderWSQ(token);
+        int width = frmHeaderWSQ.width;
+        int height = frmHeaderWSQ.height;
+        return new Resolution(width, height);
+    }
 
     public Bitmap decode(final byte[] data) {
         WsqHelper.Token token = new WsqHelper.Token(data);
