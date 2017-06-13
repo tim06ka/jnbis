@@ -10,6 +10,7 @@ import java.nio.charset.CharsetDecoder;
  */
 public class NistHelper {
     static final CharsetDecoder CP1256 = Charset.forName("cp1256").newDecoder();
+    static final CharsetDecoder KOI8R = Charset.forName("koi8-r").newDecoder();
     public static final CharsetDecoder USASCII = Charset.forName("US-ASCII").newDecoder();
     static final CharsetDecoder UTF8 = Charset.forName("UTF-8").newDecoder();
     static final CharsetDecoder UTF16 = Charset.forName("UTF-16").newDecoder();
@@ -69,7 +70,10 @@ public class NistHelper {
         // directory of charset.
         public void setCharSetDecoder(String dcs) {
             if (dcs != null) {
-                if (dcs.startsWith("000")) {
+                String lowerCase = dcs.toLowerCase();
+                if (lowerCase.contains("koi8-r") || lowerCase.contains("koi8r")) {
+                    this.charset = KOI8R;
+                } else if (dcs.startsWith("000")) {
                     this.charset = CP1256;
                 } else if (dcs.startsWith("002")) {
                     this.charset = UTF16;
